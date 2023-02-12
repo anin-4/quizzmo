@@ -1,15 +1,21 @@
 package com.example.quizzmo.data
 
+
 import com.example.quizzmo.domain.model.Question
 import com.example.quizzmo.domain.model.QuestionList
+import com.example.quizzmo.domain.model.Quiz
+import kotlinx.coroutines.flow.Flow
 
 interface FirebaseDAO {
 
-    fun setUpQuiz(questionList: QuestionList)
+    suspend fun setUpQuiz(questionList: QuestionList)
 
-    fun addOneQuestionAtATime(category: String, question: Question, quizType:String)
+    suspend fun getQuestionsForDummyQuiz(category: String):List<Question?>
 
-    suspend fun getQuestions(quizType: String,category: String,questionNumber:Int):List<Question>
+    suspend fun addDummyQuiz(quiz: Quiz)
+
+    suspend fun getListOfDummyQuizzes():Flow<List<Quiz?>?>
+
 
 
 

@@ -3,10 +3,13 @@ package com.example.quizzmo.data
 
 import android.util.Log
 import com.example.quizzmo.domain.model.Question
-import com.example.quizzmo.domain.model.Question.Companion.toQuestion
 import com.example.quizzmo.domain.model.QuestionList
+import com.example.quizzmo.domain.model.Quiz
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FireBaseDAOImpl private constructor():FirebaseDAO {
@@ -27,7 +30,8 @@ class FireBaseDAOImpl private constructor():FirebaseDAO {
         }
     }
 
-    override fun setUpQuiz(questionList: QuestionList) {
+    //used to set up both type of quizzes depending upon the category - quiz or dummyQuiz
+    override suspend fun setUpQuiz(questionList: QuestionList) {
         val category = questionList.categoryName
         val quizType = questionList.quizType
             for (question in questionList.questions) {
@@ -35,7 +39,7 @@ class FireBaseDAOImpl private constructor():FirebaseDAO {
             }
     }
 
-    override fun addOneQuestionAtATime(category: String, question: Question, quizType:String) {
+    private suspend fun addOneQuestionAtATime(category: String, question: Question, quizType:String) {
         db.collection(quizType)
             .document(category)
             .collection("questions")
@@ -49,23 +53,50 @@ class FireBaseDAOImpl private constructor():FirebaseDAO {
             }
     }
 
-    override suspend fun getQuestions(quizType: String, category: String, questionNumber: Int):List<Question> {
+    //used to get questions for dummy quizzes only
+    override suspend fun getQuestionsForDummyQuiz(category: String):List<Question?> {
         return try {
-            val querySnapshot = db.collection(quizType)
+            val querySnapshot = db.collection("dummyQuiz")
                 .document(category)
                 .collection("questions")
                 .get()
                 .await()
 
             val questions = querySnapshot.documents.map {
-                it.toQuestion()
+                it.toObject(Question::class.java)
             }
              questions
         }catch (e:Exception){
-            Log.d(TAG, "getQuestion: something went wrong")
+            Log.d(TAG, "getQuestion: something went wrong ${e.localizedMessage}")
             emptyList()
         }
     }
 
+    //used to set up list of dummyQuiz
+    override suspend fun addDummyQuiz(quiz: Quiz){
+        db.collection("DummyQuizList").add(quiz)
+    }
 
-}
+    //get the list of dummy quizzes
+    override suspend fun getListOfDummyQuizzes():Flow<List<Quiz?>?> {
+        return callbackFlow {
+            val listener = db.collection("DummyQuizList")
+                .addSnapshotListener { value, error ->
+                    if(error!=null){
+                        Log.d(TAG, "getListOfQuizzes: something went wrong")
+                        return@addSnapshotListener
+                    }
+                   val dummyQuizzes = value?.documents?.map {
+                       it.toObject(Quiz::class.java)
+                   }
+
+                        trySend(dummyQuizzes).isSuccess
+                    }
+                    awaitClose {
+                        listener.remove()
+                    }
+
+                }
+
+        }
+    }
