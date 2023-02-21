@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -15,20 +17,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quizzmo.ui.theme.Typography
 import com.example.quizzmo.ui.theme.backgroundCyanBlue
 import com.example.quizzmo.ui.theme.backgroundDeeperBlue
 import com.example.quizzmo.R
+import com.example.quizzmo.domain.model.Quiz
+import com.example.quizzmo.domain.model.QuizLevels
 import com.example.quizzmo.ui.theme.gothamFontFamily
+import java.util.*
 
 @Composable
 fun HomeScreen(
-    
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel(),
+    userName:String ="Anindya"
 ) {
+
+    val state = homeScreenViewModel.state.value
+
     Box(
         modifier = Modifier
             .background(
@@ -61,7 +73,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(80.dp))
 
             Text(
-                text = "Hello Anindya",
+                text = "Hello $userName",
                 style = Typography.h2,
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White
@@ -79,7 +91,16 @@ fun HomeScreen(
         }
 
         
-        Content(modifier = Modifier)
+        Content(modifier = Modifier, quizzes = listOf(
+            Quiz("History",
+                type = "dummyQuiz",
+                name="Exploring the past",
+                createdBy = "Anin4",
+                createdAt = "21st feb",
+                timeInSec = 600,
+                level = QuizLevels.INTERMEDIATE
+            )
+        ))
 
     }
     
@@ -89,7 +110,8 @@ fun HomeScreen(
 
 @Composable
 fun Content(
-    modifier: Modifier
+    modifier: Modifier,
+    quizzes:List<Quiz>
 ) {
 
     Box(
@@ -140,11 +162,12 @@ fun Content(
             Spacer(modifier = Modifier.height(20.dp))
 
 
-            QuizItem()
+            LazyColumn{
+                items(quizzes){quiz ->
+                    QuizItem(quiz)
+                }
+            }
 
-            QuizItem()
-
-            QuizItem()
 
             GradientButton(
                 text = "Start Quiz",
@@ -169,6 +192,7 @@ fun Content(
 @OptIn(ExperimentalTextApi::class)
 @Composable
 fun QuizItem(
+    quiz: Quiz
 ) {
 
         Row(
@@ -201,7 +225,7 @@ fun QuizItem(
             Column(
                 modifier = Modifier.padding(10.dp)
             ) {
-                Text(text = "History Quiz",
+                Text(text = quiz.name,
                     style = TextStyle(
                         fontFamily = gothamFontFamily,
                         brush =  Brush.horizontalGradient(
@@ -219,17 +243,19 @@ fun QuizItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Intermediate", style = Typography.body2)
+                    Text(text = quiz.level.toString().lowercase(Locale.ROOT).replaceFirstChar {
+                        it.uppercaseChar()
+                    }, style = Typography.body2)
 
                     Text(text = "-")
 
-                    Text(text = "10 mins")
+                    Text(text = "${quiz.secToMin()} mins")
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Anindya Ray",
+                    text = quiz.createdBy,
                     style = Typography.caption,
                     color = Color.Black.copy(alpha = 0.7f)
                 )
