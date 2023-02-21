@@ -31,6 +31,10 @@ class HomeScreenViewModel @Inject constructor(
             is HomeScreenEvents.OnStartButtonClicked -> {
                 //todo
             }
+
+            is HomeScreenEvents.OnItemSelected -> {
+                state.value = state.value.copy(selectedIndex = homeScreenEvents.index)
+            }
         }
     }
 

@@ -3,23 +3,23 @@ package com.example.quizzmo.ui.homescreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -100,7 +100,7 @@ fun HomeScreen(
                 timeInSec = 600,
                 level = QuizLevels.INTERMEDIATE
             )
-        ))
+        ), viewModel = homeScreenViewModel)
 
     }
     
@@ -111,7 +111,8 @@ fun HomeScreen(
 @Composable
 fun Content(
     modifier: Modifier,
-    quizzes:List<Quiz>
+    quizzes:List<Quiz>,
+    viewModel: HomeScreenViewModel
 ) {
 
     Box(
@@ -161,10 +162,14 @@ fun Content(
             
             Spacer(modifier = Modifier.height(20.dp))
 
-
+            var selectedIndex by remember { mutableStateOf(-1) }
             LazyColumn{
-                items(quizzes){quiz ->
-                    QuizItem(quiz)
+
+                itemsIndexed(quizzes){index, quiz ->
+                    QuizItem(index,quiz,selectedIndex ==index){
+                        selectedIndex = it
+                        viewModel.onEvent(HomeScreenEvents.OnItemSelected(it))
+                    }
                 }
             }
 
@@ -192,27 +197,36 @@ fun Content(
 @OptIn(ExperimentalTextApi::class)
 @Composable
 fun QuizItem(
-    quiz: Quiz
+    index:Int,
+    quiz: Quiz,
+    selected:Boolean,
+    onClick: (Int) -> Unit
 ) {
-
         Row(
             modifier = Modifier
                 .padding(bottom = 20.dp)
-//                .shadow(4.dp)
+                .shadow(if(selected) 0.dp else 2.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .border(
                     2.dp,
-                    brush = Brush.horizontalGradient(
+                    brush = if(selected){
+                    Brush.horizontalGradient(
                         colors = listOf(
                             backgroundDeeperBlue,
                             backgroundCyanBlue
                         ),
-                    ),
+                    )}
+                    else{
+                          Brush.horizontalGradient(listOf(Color.Transparent,Color.Transparent))
+                        },
                     RoundedCornerShape(10.dp)
                 )
                 .padding(6.dp)
+                .clickable {
+                    onClick(index)
+                }
         ) {
             Image(
                 painter = painterResource(id =R.drawable._4_2_target_free_download_png),
