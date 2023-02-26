@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.quizzmo.ui.MainViewModel
 import com.example.quizzmo.ui.homescreen.HomeScreen
+import com.example.quizzmo.ui.playquiz.QuizScreen
 import com.example.quizzmo.ui.theme.QuizzmoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,7 +28,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             QuizzmoTheme {
-              HomeScreen()
+//              HomeScreen()
+                QuizScreen()
             }
         }
     }

@@ -21,6 +21,7 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -127,23 +128,7 @@ fun Content(
 
     ){
 
-        Row(
-            modifier = Modifier.align(Alignment.TopCenter)
-        ){
-            Box(modifier = Modifier
-                .width(60.dp)
-                .height(5.dp)
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            backgroundDeeperBlue,
-                            backgroundCyanBlue
-                        )
-                    )
-                )
-
-            )
-        }
+        Bar(modifier = Modifier.align(Alignment.TopCenter))
 
         Column(
            modifier = Modifier
@@ -205,22 +190,22 @@ fun QuizItem(
         Row(
             modifier = Modifier
                 .padding(bottom = 20.dp)
-                .shadow(if(selected) 0.dp else 2.dp)
+                .shadow(if (selected) 0.dp else 2.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .border(
                     2.dp,
-                    brush = if(selected){
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            backgroundDeeperBlue,
-                            backgroundCyanBlue
-                        ),
-                    )}
-                    else{
-                          Brush.horizontalGradient(listOf(Color.Transparent,Color.Transparent))
-                        },
+                    brush = if (selected) {
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                backgroundDeeperBlue,
+                                backgroundCyanBlue
+                            ),
+                        )
+                    } else {
+                        Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent))
+                    },
                     RoundedCornerShape(10.dp)
                 )
                 .padding(6.dp)
@@ -306,6 +291,33 @@ fun GradientButton(
             )
         }
     }
+}
+
+@Composable
+fun Bar(
+    modifier: Modifier,
+    width: Dp = 60.dp,
+    height:Dp =5.dp,
+    colors:List<Color> = listOf(
+        backgroundDeeperBlue,
+        backgroundCyanBlue
+    )
+) {
+    Row(
+        modifier = modifier
+    ){
+        Box(modifier = Modifier
+            .width(width)
+            .height(height)
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = colors
+                )
+            )
+
+        )
+    }
+
 }
 
 
